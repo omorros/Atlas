@@ -10,6 +10,151 @@ const COLOURS: Record<string, string> = {
   fragile: "#d97757",
 };
 
+const esc = (s: string) =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
+const formatFundingAmount = (musd: number): string => {
+  if (musd >= 1000) {
+    const b = musd / 1000;
+    return Number.isInteger(b) ? `$${b}B` : `$${b.toFixed(1)}B`;
+  }
+  return Number.isInteger(musd) ? `$${musd}M` : `$${musd.toFixed(1)}M`;
+};
+
+const formatFundingDate = (iso: string): string => {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
+};
+
+const formatIncorporated = (s: string): string => {
+  const m = s.match(/^(\d{4})/);
+  return m ? m[1] : s;
+};
+
+function buildSpecterPopupHTML(cp: Counterparty, pinned: boolean): string {
+  const chip = COLOURS[cp.health_tag] || COLOURS.stable;
+  const closeBtn = pinned
+    ? `<button data-cp-popup-close="1" aria-label="Close" style="position:absolute;top:6px;right:8px;width:20px;height:20px;background:transparent;border:0;color:#b8ad94;font-size:18px;line-height:1;cursor:pointer;padding:0;font-family:inherit;">×</button>`
+    : "";
+
+  const subline = `${esc(cp.type)} · ${esc(cp.region)} · ${esc(cp.provider)}`;
+  const header = `
+    <div style="padding:10px 12px;position:relative;${pinned ? "padding-right:32px;" : ""}">
+      ${closeBtn}
+      <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+        <div style="font-weight:600;color:#ece2c9;font-size:13px;letter-spacing:0.01em;">${esc(cp.name)}</div>
+        <span style="font-size:9px;letter-spacing:0.18em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:${chip}26;color:${chip};border:1px solid ${chip}55;font-family:ui-monospace,Menlo,monospace;flex-shrink:0;">${esc(cp.health_tag)}</span>
+      </div>
+      <div style="margin-top:3px;color:#b8ad94;font-size:10px;font-family:ui-monospace,Menlo,monospace;letter-spacing:0.04em;">${subline}</div>
+    </div>`;
+
+  const profile = cp.profile_json;
+  if (!profile) {
+    return `<div style="background:#0f141b;border:1px solid #23303d;border-radius:6px;color:#ece2c9;width:260px;font-family:ui-sans-serif,system-ui,sans-serif;overflow:hidden;box-shadow:0 12px 32px -12px rgba(0,0,0,0.65);">
+      ${header}
+      <div style="padding:8px 12px;border-top:1px solid #23303d;color:#5a6677;font-size:11px;font-style:italic;font-family:ui-monospace,Menlo,monospace;">No Specter profile</div>
+    </div>`;
+  }
+
+  const deltaPct = Math.round(profile.headcount_delta_90d_pct);
+  const deltaPositive = deltaPct >= 0;
+  const arrow = deltaPositive ? "▲" : "▼";
+  const arrowColor = deltaPositive ? "#86a99a" : "#d97757";
+  const sign = deltaPositive ? "+" : "";
+
+  const rowStyle =
+    "display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:3px 0;font-family:ui-monospace,Menlo,monospace;font-size:11px;";
+
+  let factRows = `
+    <div style="${rowStyle}">
+      <span style="color:#b8ad94;">Headcount</span>
+      <span style="color:#ece2c9;text-align:right;">${profile.headcount.toLocaleString("en-US")}<span style="color:${arrowColor};margin-left:8px;">${arrow} ${sign}${deltaPct}% (90d)</span></span>
+    </div>`;
+
+  if (profile.last_funding_round_amount_musd != null || profile.last_funding_round_date) {
+    const amount =
+      profile.last_funding_round_amount_musd != null
+        ? formatFundingAmount(profile.last_funding_round_amount_musd)
+        : null;
+    const date = profile.last_funding_round_date
+      ? formatFundingDate(profile.last_funding_round_date)
+      : null;
+    const value = [amount, date].filter(Boolean).join(" · ");
+    factRows += `
+      <div style="${rowStyle}">
+        <span style="color:#b8ad94;">Last funding</span>
+        <span style="color:#ece2c9;text-align:right;">${esc(value)}</span>
+      </div>`;
+  }
+
+  factRows += `
+    <div style="${rowStyle}">
+      <span style="color:#b8ad94;">Incorporated</span>
+      <span style="color:#ece2c9;text-align:right;">${esc(formatIncorporated(profile.incorporated))}</span>
+    </div>`;
+
+  const factsSection = `<div style="padding:8px 12px;border-top:1px solid #23303d;">${factRows}</div>`;
+
+  let investorsSection = "";
+  if (profile.investors.length > 0) {
+    const shown = profile.investors.slice(0, 4).map(esc).join(' <span style="color:#5a6677;">·</span> ');
+    const more = profile.investors.length - 4;
+    const moreEl = more > 0 ? ` <span style="color:#5a6677;">+${more} more</span>` : "";
+    investorsSection = `
+      <div style="padding:8px 12px;border-top:1px solid #23303d;">
+        <div style="font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:0.22em;color:#b8ad94;text-transform:uppercase;margin-bottom:5px;">Investors</div>
+        <div style="color:#ece2c9;font-size:11px;line-height:1.5;">${shown}${moreEl}</div>
+      </div>`;
+  }
+
+  let newsSection = "";
+  if (profile.news_flags.length > 0) {
+    const chips = profile.news_flags
+      .map(
+        (f) =>
+          `<div style="display:inline-block;padding:2px 7px;margin:3px 4px 0 0;background:#d9775714;border:1px solid #d9775744;color:#d97757;font-size:11px;border-radius:3px;font-family:ui-monospace,Menlo,monospace;">${esc(f)}</div>`,
+      )
+      .join("");
+    newsSection = `
+      <div style="padding:8px 12px;border-top:1px solid #23303d;">
+        <div style="font-family:ui-monospace,Menlo,monospace;font-size:9px;letter-spacing:0.22em;color:#d97757;text-transform:uppercase;margin-bottom:2px;">⚠ News flags</div>
+        <div>${chips}</div>
+      </div>`;
+  }
+
+  let footerSection = "";
+  if (profile.website || profile.address) {
+    const parts: string[] = [];
+    if (profile.website && /^https?:\/\//i.test(profile.website)) {
+      const cleaned = profile.website.replace(/^https?:\/\//i, "").replace(/\/$/, "");
+      parts.push(
+        `<a href="${esc(profile.website)}" target="_blank" rel="noreferrer" style="color:#c9a86e;text-decoration:none;">${esc(cleaned)}</a>`,
+      );
+    }
+    if (profile.address) parts.push(`<span style="color:#b8ad94;">${esc(profile.address)}</span>`);
+    if (parts.length > 0) {
+      footerSection = `
+        <div style="padding:8px 12px;border-top:1px solid #23303d;font-family:ui-monospace,Menlo,monospace;font-size:10px;line-height:1.5;">
+          ${parts.join('<span style="color:#5a6677;margin:0 7px;">·</span>')}
+        </div>`;
+    }
+  }
+
+  return `<div style="background:#0f141b;border:1px solid #23303d;border-radius:6px;color:#ece2c9;width:300px;font-family:ui-sans-serif,system-ui,sans-serif;overflow:hidden;box-shadow:0 12px 32px -12px rgba(0,0,0,0.65);">
+    ${header}
+    ${factsSection}
+    ${investorsSection}
+    ${newsSection}
+    ${footerSection}
+  </div>`;
+}
+
 export default function Globe({
   counterparties,
   pulseEvents,
@@ -22,7 +167,12 @@ export default function Globe({
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const styleLoadedRef = useRef(false);
+  const counterpartiesRef = useRef<Counterparty[]>(counterparties);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    counterpartiesRef.current = counterparties;
+  }, [counterparties]);
 
   // Init map
   useEffect(() => {
@@ -133,21 +283,81 @@ export default function Globe({
         },
       });
 
-      // Hover popup
-      const popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, className: "radar-popup" });
+      // Specter info popup — hover to peek, click to pin.
+      const popup = new mapboxgl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: "radar-popup",
+        maxWidth: "320px",
+        offset: 14,
+      });
+      let pinnedId: string | null = null;
+
+      const findCp = (id: string) =>
+        counterpartiesRef.current.find((c) => c.id === id) ?? null;
+
+      const showPopup = (
+        cp: Counterparty,
+        lngLat: [number, number],
+        pinned: boolean,
+      ) => {
+        popup.setLngLat(lngLat).setHTML(buildSpecterPopupHTML(cp, pinned)).addTo(map);
+      };
+
+      // Re-attach the × delegated listener every time the popup re-mounts
+      // (mapbox rebuilds the DOM on each addTo).
+      popup.on("open", () => {
+        const el = popup.getElement();
+        if (!el) return;
+        el.addEventListener("click", (ev) => {
+          const t = ev.target as HTMLElement | null;
+          if (t?.closest('[data-cp-popup-close="1"]')) {
+            pinnedId = null;
+            popup.remove();
+          }
+        });
+      });
+
       map.on("mouseenter", "cp-dot", (e) => {
         map.getCanvas().style.cursor = "pointer";
+        if (pinnedId) return;
         const f = e.features?.[0];
         if (!f) return;
-        const p = f.properties as any;
-        popup
-          .setLngLat((f.geometry as any).coordinates)
-          .setHTML(`<div style="background:#11151c;padding:6px 10px;border:1px solid #1f242c;border-radius:6px;color:#e5e7eb;font-size:12px;font-family:ui-monospace,monospace"><strong>${p.name}</strong><br/><span style="color:#9ca3af">${p.type} · ${p.health_tag}</span></div>`)
-          .addTo(map);
+        const id = (f.properties as any).id as string;
+        const cp = findCp(id);
+        if (!cp) return;
+        showPopup(cp, (f.geometry as any).coordinates, false);
       });
+
       map.on("mouseleave", "cp-dot", () => {
         map.getCanvas().style.cursor = "";
+        if (pinnedId) return;
         popup.remove();
+      });
+
+      map.on("click", "cp-dot", (e) => {
+        const f = e.features?.[0];
+        if (!f) return;
+        const id = (f.properties as any).id as string;
+        if (pinnedId === id) {
+          pinnedId = null;
+          popup.remove();
+          return;
+        }
+        const cp = findCp(id);
+        if (!cp) return;
+        pinnedId = id;
+        showPopup(cp, (f.geometry as any).coordinates, true);
+      });
+
+      // Click on empty map background unpins.
+      map.on("click", (e) => {
+        if (!pinnedId) return;
+        const hits = map.queryRenderedFeatures(e.point, { layers: ["cp-dot"] });
+        if (hits.length === 0) {
+          pinnedId = null;
+          popup.remove();
+        }
       });
     });
     map.once("load", () => {

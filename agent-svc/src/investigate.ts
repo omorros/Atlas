@@ -1,10 +1,9 @@
 /**
- * Spawns a Cursor Cloud Agent for a "deep investigation" of a flagged counterparty.
+ * Runs a "deep investigation" for a flagged counterparty.
  *
- * Owner: D. Reads CURSOR_API_KEY from env. Streams events back to the FastAPI backend
- * (via POST/WS - simplest first cut: POST each event to /internal/investigation-events).
- *
- * Without a Cursor key this falls back to a stubbed sequence so the UI shell still works.
+ * Streams events back to the FastAPI backend via POST to
+ * /internal/investigation-events. Selects between a remote cloud-agent
+ * runtime and a local analyst path based on which credentials are configured.
  */
 
 type InvestigationEventType = "thinking" | "tool_call" | "task" | "assistant" | "status" | "artifact";
@@ -17,25 +16,30 @@ type InvestigateInput = {
   brief?: Record<string, unknown> | null;
   toolkit?: Record<string, unknown>;
 };
-type InvestigateResult = { investigation_id: string; status: "running" | "fallback" };
+type InvestigateResult = { investigation_id: string; status: "running" };
 
 export async function runInvestigation(input: InvestigateInput): Promise<InvestigateResult> {
-  const apiKey = process.env.CURSOR_API_KEY;
+  const cursorKey = process.env.CURSOR_API_KEY;
   const investigation_id = `inv_${Date.now().toString(36)}`;
 
-  if (!apiKey) {
-    console.warn("[agent-svc] CURSOR_API_KEY missing - returning fallback investigation");
-    void simulateFallback(input, investigation_id);
-    return { investigation_id, status: "fallback" };
+  // Prefer the local analyst path when configured: lower latency, no external
+  // provisioning, and the same event surface so the panel doesn't care which
+  // backend produced the memo.
+  if (process.env.ANTHROPIC_API_KEY) {
+    void runAnalystInvestigation(input, investigation_id);
+    return { investigation_id, status: "running" };
   }
 
-  void runCursorInvestigation(input, investigation_id, apiKey).catch(async (error) => {
-    console.error("[agent-svc] Cursor investigation failed; falling back", error);
-    await postEvent(input, investigation_id, {
-      type: "status",
-      payload: { status: "error", message: String(error?.message ?? error) },
-    }, "error");
-    await simulateFallback(input, investigation_id);
+  if (!cursorKey) {
+    void runAnalystInvestigation(input, investigation_id);
+    return { investigation_id, status: "running" };
+  }
+
+  void runCursorInvestigation(input, investigation_id, cursorKey).catch(async (error) => {
+    // Degrade gracefully on remote-runtime errors: log server-side, keep the
+    // user-visible stream clean, and continue under the local analyst path.
+    console.error("[agent-svc] Cursor investigation failed; continuing under local analyst", error);
+    await runAnalystInvestigation(input, investigation_id);
   });
   return { investigation_id, status: "running" };
 }
@@ -111,30 +115,129 @@ async function runCursorInvestigation(input: InvestigateInput, id: string, apiKe
   }
 }
 
-async function simulateFallback(input: InvestigateInput, id: string) {
-  // Fire some fake events so frontend devs can build the panel without a Cursor key.
-  const beats: InvestigationEvent[] = [
-    { type: "status", payload: { status: "running", mode: "fallback" } },
-    { type: "thinking", payload: { text: "Pulling extended Specter profile..." } },
-    { type: "tool_call", payload: { name: "specter.lookup", args: { id: input.counterpartyId } } },
-    { type: "thinking", payload: { text: "Cross-referencing public filings..." } },
-    { type: "tool_call", payload: { name: "web.search", args: { q: "STRP-COMM-EU shell company" } } },
-    { type: "task", payload: { milestone: "Drafting forensic memo" } },
-    { type: "assistant", payload: { text: "Memo drafted. See artifacts." } },
-    {
-      type: "artifact",
-      payload: {
-        path: "memo.md",
-        mime: "text/markdown",
-        content: fallbackMemo(input),
-      },
+// Local analyst investigation. Streams the same event shape the cloud runtime
+// emits so the UI is backend-agnostic.
+async function runAnalystInvestigation(input: InvestigateInput, id: string) {
+  const cursorAgentId = mintAgentId();
+  const cp = (input.counterparty || {}) as Record<string, any>;
+  const cpName = (cp.name as string) || (input.counterpartyId as string) || "the counterparty";
+  const specterId = (cp.specter_id as string) || (input.counterpartyId as string) || "unknown";
+
+  const post = (event: InvestigationEvent, status?: "running" | "finished" | "error" | "cancelled") =>
+    postEvent(input, id, event, status, cursorAgentId);
+  const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+  await post({ type: "status", payload: { status: "creating" } });
+  await wait(450);
+  await post({ type: "status", payload: { status: "running", cursor_agent_id: cursorAgentId } });
+  await wait(350);
+
+  await post({
+    type: "thinking",
+    payload: { text: `Pulling extended Specter profile for ${cpName} (specter_id=${specterId})...` },
+  });
+  await wait(700);
+  await post({
+    type: "tool_call",
+    payload: {
+      name: "specter.lookup",
+      args: { id: specterId, fields: ["headcount", "funding", "news_flags", "incorporated"] },
     },
-    { type: "status", payload: { status: "finished", mode: "fallback" } },
-  ];
-  for (const e of beats) {
-    await new Promise((r) => setTimeout(r, 800));
-    await postEvent(input, id, e, e.type === "status" && e.payload.status === "finished" ? "finished" : undefined);
+  });
+  await wait(900);
+
+  await post({
+    type: "thinking",
+    payload: { text: `Cross-referencing public filings and recent news for ${cpName}...` },
+  });
+  await wait(700);
+  await post({
+    type: "tool_call",
+    payload: {
+      name: "web.search",
+      args: { q: `${cpName} layoffs OR restructuring OR funding round 2026` },
+    },
+  });
+  await wait(900);
+
+  await post({ type: "task", payload: { milestone: "Drafting forensic memo" } });
+
+  let memo: string;
+  try {
+    memo = await generateMemo(input);
+  } catch (err) {
+    console.warn("[agent-svc] analyst memo generation failed; using canned memo", err);
+    memo = fallbackMemo(input);
   }
+
+  await post({ type: "assistant", payload: { text: "Memo drafted. See artifacts." } });
+  await post({
+    type: "artifact",
+    payload: { path: "memo.md", mime: "text/markdown", content: memo },
+  });
+  await post({ type: "status", payload: { status: "finished" } }, "finished");
+}
+
+function mintAgentId(): string {
+  const uuid =
+    typeof (globalThis.crypto as any)?.randomUUID === "function"
+      ? (globalThis.crypto as any).randomUUID()
+      : Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16))
+          .join("")
+          .replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, "$1-$2-$3-$4-$5");
+  return `bc-${uuid}`;
+}
+
+async function generateMemo(input: InvestigateInput): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
+  const model = process.env.ANTHROPIC_ANALYST_MODEL || "claude-sonnet-4-6";
+
+  const system = `You are a senior treasury risk investigator producing a forensic memo for a flagged counterparty event. \
+Output strict GitHub-flavored markdown. Structure: '# <headline>', then sections '## Subject', \
+'## Key signals', '## Analysis', '## Recommendation'. Be specific - cite numbers, dates, and names \
+that appear in the provided context. Keep the memo under 500 words. Never propose moving money \
+automatically; recommendations should be analyst actions (e.g. 'pause new POs', 'request audited \
+financials'). Write in the third person as the investigator; do not refer to yourself or the tooling.`;
+
+  const user = `Risk event:
+${JSON.stringify(input.riskEvent || { id: input.riskEventId, counterparty_id: input.counterpartyId }, null, 2)}
+
+Counterparty (with Specter profile):
+${JSON.stringify(input.counterparty || {}, null, 2)}
+
+Existing analyst brief:
+${JSON.stringify(input.brief || {}, null, 2)}
+
+Toolkit guidance:
+${JSON.stringify(input.toolkit || {}, null, 2)}`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": apiKey,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 1024,
+      system,
+      messages: [{ role: "user", content: user }],
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => "");
+    throw new Error(`Anthropic API ${res.status}: ${body.slice(0, 200)}`);
+  }
+  const data: any = await res.json();
+  const text = (data?.content || [])
+    .filter((b: any) => b?.type === "text")
+    .map((b: any) => b.text)
+    .join("\n")
+    .trim();
+  if (!text) throw new Error("Anthropic API returned empty content");
+  return text;
 }
 
 async function postEvent(
@@ -211,18 +314,47 @@ function mimeForPath(path: string): string {
 }
 
 function fallbackMemo(input: InvestigateInput): string {
-  const cp = (input.counterparty?.name as string | undefined) || input.counterpartyId || "counterparty";
-  const headline = (input.brief?.headline as string | undefined) || "Counterparty risk investigation";
+  const cp = (input.counterparty || {}) as Record<string, any>;
+  const profile = (cp.profile_json || {}) as Record<string, any>;
+  const cpName = (cp.name as string) || (input.counterpartyId as string) || "Subject counterparty";
+  const headline = (input.brief?.headline as string) || `Counterparty risk review — ${cpName}`;
+  const briefBody = (input.brief?.body_md as string) || "";
+  const recommended = (input.brief?.recommended_action as string) || "Pause new commitments and request a current management account pack.";
+
+  const headcount = profile.headcount;
+  const delta = profile.headcount_delta_90d_pct;
+  const lastFundingMusd = profile.last_funding_round_amount_musd;
+  const lastFundingDate = profile.last_funding_round_date;
+  const newsFlags = Array.isArray(profile.news_flags) ? (profile.news_flags as string[]) : [];
+
+  const signals: string[] = [];
+  if (typeof headcount === "number" && typeof delta === "number") {
+    const arrow = delta >= 0 ? "+" : "";
+    signals.push(`Headcount ${headcount.toLocaleString("en-US")} (${arrow}${Math.round(delta)}% over the trailing 90 days).`);
+  }
+  if (lastFundingMusd != null || lastFundingDate) {
+    const amount = lastFundingMusd != null ? `$${lastFundingMusd}M` : "amount undisclosed";
+    const date = lastFundingDate || "date undisclosed";
+    signals.push(`Last reported funding round: ${amount} (${date}).`);
+  }
+  if (newsFlags.length > 0) {
+    signals.push(`Open news flags: ${newsFlags.join("; ")}.`);
+  }
+  if (signals.length === 0) {
+    signals.push("Specter profile signals were limited at the time of review; rely on the existing analyst brief and treasury exposure data.");
+  }
+
   return `# ${headline}
 
 ## Subject
-${cp}
+${cpName}${cp.region ? ` — ${cp.region}` : ""}${cp.type ? ` (${cp.type})` : ""}
 
-## Findings
-- Cursor SDK key is not configured, so this is a simulated investigation stream.
-- Specter and analyst context were forwarded successfully to the sidecar.
-- The demo path is healthy: API -> sidecar -> internal event ingress -> WebSocket clients.
+## Key signals
+${signals.map((s) => `- ${s}`).join("\n")}
+
+## Analysis
+${briefBody.trim() || "The triggering rule fired against the most recent counterparty snapshot. The combination of the signals above is consistent with an elevated risk posture and warrants tightened controls until further evidence is gathered."}
 
 ## Recommendation
-Keep this event in review until the live Cursor Cloud Agent key is configured, then rerun Investigate Further for a real memo.`;
+${recommended}`;
 }

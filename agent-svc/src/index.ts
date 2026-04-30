@@ -1,4 +1,7 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+// Load service-local first, then fall back to the repo-root .env for shared keys.
+dotenv.config();
+dotenv.config({ path: "../.env" });
 import express from "express";
 import { runInvestigation } from "./investigate";
 

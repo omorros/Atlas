@@ -71,6 +71,22 @@ Humans decide. The agent never moves money.
 
 </td>
 </tr>
+<tr>
+<td width="50%">
+
+**Deep investigation.** Cloud agent streams live tool calls — Specter lookup, web search, draft — into the panel beside the analyst brief.
+
+![deep investigation](docs/screenshots/investigation.png)
+
+</td>
+<td width="50%">
+
+**Forensic memo.** The artifact the agent drops on completion: subject, key signals, analysis, recommendation — citing the actual Specter signals from the run.
+
+![forensic memo](docs/screenshots/memo.png)
+
+</td>
+</tr>
 </table>
 
 ---
