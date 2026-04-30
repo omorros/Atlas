@@ -27,7 +27,11 @@
       "Bash(netstat -ano)",
       "Bash(taskkill //PID 13132 //F)",
       "Bash(taskkill //PID 26108 //F)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(python -m uvicorn app.main:app --port 8000)",
+      "Bash(pip install *)",
+      "Bash(awk '{print $NF}')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('counterparties:', len\\(d['counterparties']\\), '| open events:', len\\(d['open_risk_events']\\), '| briefs:', len\\(d['recent_briefs']\\), '| metrics critical:', d['metrics']['open_critical_count'], '| burn/d:', d['metrics']['daily_burn_calibrated_usd'], '| runway:', d['metrics']['global_runway_months']\\)\")"
     ]
   }
 }

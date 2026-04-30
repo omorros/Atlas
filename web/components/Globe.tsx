@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-// Same-origin worker URL (bundled). Cross-origin CDN workerUrl throws SecurityError from localhost.
-import mapboxWorkerUrl from "mapbox-gl/dist/mapbox-gl-csp-worker.js?url";
 import type { Counterparty } from "@/lib/types";
 
 const COLOURS: Record<string, string> = {
@@ -34,7 +32,6 @@ export default function Globe({
       setError("NEXT_PUBLIC_MAPBOX_TOKEN missing in web/.env");
       return;
     }
-    mapboxgl.workerUrl = mapboxWorkerUrl;
     mapboxgl.accessToken = token;
     let map: mapboxgl.Map;
     try {

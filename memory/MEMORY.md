@@ -1,0 +1,1 @@
+- [No Claude co-author line in commits](feedback_no_coauthor.md) — strip the Co-Authored-By: Claude trailer when committing
