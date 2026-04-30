@@ -25,6 +25,7 @@ export default function TopBar({ metrics }: { metrics: Metrics | null }) {
         <Stat label="Runway" value={metrics ? `${metrics.global_runway_months.toFixed(1)} mo` : "—"} />
         <Stat label="Largest exposure" value={metrics ? `${(metrics.largest_provider_exposure_pct * 100).toFixed(0)}%` : "—"} />
         <Stat label="Critical" value={metrics ? String(metrics.open_critical_count) : "—"} tone={metrics && metrics.open_critical_count > 0 ? "crit" : undefined} />
+        <Stat label="Burn / d" value={metrics ? `$${metrics.daily_burn_calibrated_usd.toLocaleString()}` : "—"} />
         <Stat label="Briefs / hr" value={metrics ? String(metrics.briefs_last_hour) : "—"} />
         <Stat label="LLM spend" value={metrics ? `$${metrics.llm_spend_usd.toFixed(2)}` : "—"} />
       </div>

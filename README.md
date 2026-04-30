@@ -25,14 +25,8 @@ npm --prefix agent-svc install
 pip install -r api/requirements.txt
 ```
 
-### 3. Add your keys
-Each `.env` file is gitignored and pre-created with empty values. Open and fill:
-- `./.env` (root — shared)
-- `api/.env` (backend)
-- `web/.env` (frontend — needs `NEXT_PUBLIC_MAPBOX_TOKEN`)
-- `agent-svc/.env` (sidecar — needs `CURSOR_API_KEY`)
-
-**Without keys, the system runs in fallback mode** (canned Specter, fallback briefs, fake investigation events). Useful for offline dev. See [API keys](#api-keys) below.
+### 3. Environment (optional)
+Copy each package’s `.env.example` to `.env` at the repo root, in `api/`, `web/`, and `agent-svc/` when you need full integrations. Without those files, much of the stack still runs with canned or fallback behavior. See `api/README.md`, `web/README.md`, and `agent-svc/README.md` for details.
 
 ### 4. Run everything
 ```bash
@@ -64,7 +58,7 @@ Or click the buttons in the **Demo Dock** at the bottom of the UI.
 PRD.md                          # The spec. Read first.
 README.md                       # You are here.
 package.json                    # Root: concurrently dev script.
-.env                            # Root keys (gitignored, pre-created).
+.env                            # Local config (gitignored); see .env.example.
 shared/
   fixtures.json                 # Seed data: counterparties, accounts, transactions, Specter profiles.
   types.ts                      # TS contracts (frontend + sidecar).
@@ -121,54 +115,6 @@ agent-svc/                      # Node sidecar (Cursor SDK) - Owner D
 | **D — Specter + Cursor SDK** | `api/app/specter/client.py`, `agent-svc/**` | Wire Specter REST. Boot-time enrichment on startup. Wire `@cursor/sdk` in `agent-svc/src/investigate.ts` for real cloud agents. Forward investigation events back to FastAPI → WS clients. |
 
 `grep -rn "TODO" .` to see your tickets.
-
----
-
-## API keys
-
-All four are optional for local dev — the app runs with fallbacks if missing. But you'll want each for the demo:
-
-### 1. Mapbox (free, takes 60 seconds) — for Person C
-- Sign up: https://account.mapbox.com/auth/signup/
-- Create token: https://account.mapbox.com/access-tokens/ → "Create a token" → keep default scopes
-- Paste into `web/.env` as `NEXT_PUBLIC_MAPBOX_TOKEN`
-- Free tier: 50k loads/month, way more than enough.
-
-### 2. Anthropic (Claude — Haiku + Sonnet) — for Person B
-- Sign up / log in: https://console.anthropic.com
-- Create key: Settings → API Keys → "Create Key"
-- Paste into `api/.env` and root `.env` as `ANTHROPIC_API_KEY`
-- Add ~$5 of credits, more than enough for the hack.
-- Models we use: `claude-haiku-4-5-20251001`, `claude-sonnet-4-6`.
-
-### 3. OpenAI (embeddings only) — for Person B
-- Sign up / log in: https://platform.openai.com
-- Create key: https://platform.openai.com/api-keys → "Create new secret key"
-- Paste into `api/.env` and root `.env` as `OPENAI_API_KEY`
-- We only use `text-embedding-3-large`. Trivial spend.
-
-### 4. Specter (sponsor) — for Person D
-- This is **the sponsor**. Ping **Francisco on the hackathon Discord** for access (referenced on the event page: "Best use of Specter — Ping Francisco for access on Discord").
-- Confirm whether you'll get a regular API key, an MCP endpoint, or both.
-- Paste into `api/.env` and root `.env` as `SPECTER_API_KEY`. If MCP-only, ask Francisco for the MCP URL and we'll wire it for the Cursor cloud agent.
-
-### 5. Cursor SDK (key + access) — for Person D
-**This is what you asked about.** Two ways:
-
-**a) The hackathon prize bucket gives you SDK access.** The event page lists "Best use of Cursor — $100 credits to be shared on Discord + Cursor SDK". Check the hackathon Discord — the organisers usually drop a code/instructions for participants.
-
-**b) Direct key from your Cursor account:**
-1. Make sure you're on a paid Cursor plan (Pro or higher) — SDK access is gated.
-2. Open https://cursor.com → Settings → **Integrations** → look for "API Keys" or "SDK".
-3. If the dashboard doesn't show it yet (the SDK is recent), apply at https://cursor.com/sdk or check the announcement post linked from the cookbook: https://github.com/cursor/cookbook
-4. Format will be `crsr_...`. Paste into `agent-svc/.env` as `CURSOR_API_KEY`.
-
-If you can't get a key in time, the sidecar runs a **simulated investigation** (fake event stream) so the rest of the team can build against it. The demo will work either way.
-
-**Cursor SDK refs:**
-- Cookbook: https://github.com/cursor/cookbook
-- Quickstart example: https://github.com/cursor/cookbook/tree/main/sdk/quickstart
-- Docs: https://cursor.com/docs/api/sdk/typescript
 
 ---
 

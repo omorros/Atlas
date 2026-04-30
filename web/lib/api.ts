@@ -44,6 +44,8 @@ function offlineState(): StateResponse {
       open_critical_count: 0,
       briefs_last_hour: 0,
       llm_spend_usd: 0,
+      daily_burn_calibrated_usd: 0,
+      observed_daily_outflow_usd: 0,
     },
   };
 }

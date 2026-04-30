@@ -1,6 +1,6 @@
 # api/ — FastAPI backend
 
-**Owner: A (spine + sim) and B (rules + workers).**
+**Subsystem:** core API (routing, DB, seed, demo) and **risk engine** (rules R1–R4, LLM workers, pipeline).
 
 ## Quickstart
 ```bash
@@ -12,28 +12,30 @@ DB seeds itself from `shared/fixtures.json` on first boot. SQLite file lives at 
 
 ## What's wired vs TODO
 
-| Module | Status | Owner |
+| Module | Status | Subsystem |
 |---|---|---|
-| `app/main.py` — FastAPI app, lifespan, routers | ✅ wired | A |
-| `app/db.py` — SQLAlchemy models | ✅ wired | A |
-| `app/seed.py` — load fixtures into DB | ✅ wired | A |
-| `app/routers/state.py` — `GET /state` | ✅ wired with metrics calc | A |
-| `app/routers/demo.py` — 3 demo triggers | ✅ wired (publish to bus, mutate DB) | A |
-| `app/routers/risk_events.py` — escalate/dismiss/resolve/investigate | ✅ wired | A |
-| `app/routers/ws.py` — `WS /events/stream` | ✅ wired | A |
-| `app/events.py` — in-process EventBus | ✅ wired | A |
-| `app/simulator.py` — background txns | ✅ wired (not started in lifespan yet) | A |
-| `app/rules/r1_specter_delta.py` | ⏳ stub | B |
-| `app/rules/r3_new_counterparty.py` | ⏳ stub | B |
-| `app/rules/r4_anomalous_payment.py` | ⏳ stub | B |
-| `app/rules/base.py` — engine loop | ✅ framework / ⏳ wire to workers | B |
-| `app/workers/triage.py` — Haiku call | ⏳ stub (fallback to keep=True) | B |
-| `app/workers/analyst.py` — Sonnet call | ⏳ stub (fallback brief) | B |
-| `app/workers/embeddings.py` — OpenAI + cosine | ⏳ stub | B |
-| `app/specter/client.py` — REST + canned fallback | ⏳ stub (canned works) | D |
+| `app/main.py` — FastAPI app, lifespan, routers | ✅ wired | Core API |
+| `app/db.py` — SQLAlchemy models | ✅ wired | Core API |
+| `app/seed.py` — load fixtures into DB | ✅ wired | Core API |
+| `app/routers/state.py` — `GET /state` | ✅ wired with metrics calc | Core API |
+| `app/routers/demo.py` — 3 demo triggers | ✅ wired (publish to bus, mutate DB) | Core API |
+| `app/routers/risk_events.py` — escalate/dismiss/resolve/investigate | ✅ wired | Core API |
+| `app/routers/ws.py` — `WS /events/stream` | ✅ wired | Core API |
+| `app/events.py` — in-process EventBus | ✅ wired | Core API |
+| `app/simulator.py` — background txns | ✅ wired (not started in lifespan yet) | Core API |
+| `app/rules/r1_specter_delta.py` | ✅ R1 | Risk engine |
+| `app/rules/r2_standing_exposure.py` | ✅ R2 | Risk engine |
+| `app/rules/r3_new_counterparty.py` | ✅ R3 | Risk engine |
+| `app/rules/r4_anomalous_payment.py` | ✅ R4 | Risk engine |
+| `app/rules/base.py` + `risk_pipeline.py` | ✅ 5s tick → triage → analyst → persist + WS | Risk engine |
+| `app/workers/triage.py` — Haiku | ✅ (fallback keep=True if no key) | Risk engine |
+| `app/workers/analyst.py` — Sonnet | ✅ (fallback brief if no key) | Risk engine |
+| `app/workers/embeddings.py` — OpenAI + cosine | ✅ similar-flags corpus (watch/fragile + shells) | Risk engine |
+| `../scripts/eval_risk_harness.py` | ✅ sample R3 path | Risk engine |
+| `app/specter/client.py` — REST + canned fallback | ⏳ stub (canned works) | Integrations |
 
 ## TODO markers
-Search for `TODO(A)` / `TODO(B)` / `TODO(D)` in the source.
+Search for `TODO(A)` / `TODO(B)` / `TODO(D)` in the source (team shorthand in code comments).
 
 ## Run the demo from CLI
 ```bash

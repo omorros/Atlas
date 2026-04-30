@@ -8,10 +8,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..config import settings
 from ..db import CounterpartyRow, TransactionRow, get_session
 from ..events import bus
+from ..llm_metrics import reset_llm_spend_usd
+from ..routers.state import publish_metrics_to_ws
+from ..seed import truncate_and_seed
 
 router = APIRouter(prefix="/demo")
+
+
+@router.post("/reset")
+async def demo_reset() -> dict:
+    """Wipe DB + reseed fixtures and reset cumulative LLM spend (repeatable demos)."""
+    if not settings.DEMO_RESET_ENABLED:
+        raise HTTPException(status_code=403, detail="Demo reset disabled (set DEMO_RESET_ENABLED=1)")
+    await truncate_and_seed()
+    reset_llm_spend_usd()
+    await publish_metrics_to_ws()
+    return {"ok": True}
 
 
 @router.post("/trigger/bank-downgrade")
@@ -35,8 +50,6 @@ async def trigger_bank_downgrade(s: AsyncSession = Depends(get_session)) -> dict
             "profile_json": cp.profile_json,
         },
     })
-    # TODO(B): rule engine should pick this up on next tick. For demo, manual nudge:
-    # from ..rules.r1_specter_delta import evaluate_for; await evaluate_for(cp.id)
     return {"ok": True, "counterparty_id": cp.id}
 
 
@@ -66,13 +79,12 @@ async def trigger_vendor_payment(s: AsyncSession = Depends(get_session)) -> dict
             "occurred_at": tx.occurred_at.isoformat(),
         },
     })
-    # TODO(B): rule engine should fire R3 + R4 next tick.
     return {"ok": True, "transaction_id": tx.id}
 
 
 @router.post("/trigger/customer-turn")
 async def trigger_customer_turn(s: AsyncSession = Depends(get_session)) -> dict:
-    """P1 - Beat 3: flip Globex to fragile while they owe us money."""
+    """Beat 3: flip Globex to fragile while they owe us money."""
     cp = (await s.execute(select(CounterpartyRow).where(CounterpartyRow.id == "cp_globex"))).scalar_one_or_none()
     if not cp:
         raise HTTPException(404, "Globex not seeded")
