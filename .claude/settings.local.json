@@ -22,7 +22,12 @@
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3003/)",
       "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:3003/app)",
       "Bash(curl -s http://localhost:3003/app)",
-      "Bash(curl *)"
+      "Bash(curl *)",
+      "Bash(xargs grep *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //PID 13132 //F)",
+      "Bash(taskkill //PID 26108 //F)",
+      "Read(//tmp/**)"
     ]
   }
 }

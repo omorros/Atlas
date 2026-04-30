@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Globe from "@/components/Globe";
 import RiskInbox from "@/components/RiskInbox";
 import DemoDock from "@/components/DemoDock";
@@ -83,14 +82,8 @@ export default function Dashboard() {
         />
       )}
       <DemoDock />
-      <Link
-        href="/"
-        className="absolute top-3 right-6 z-30 text-xs tracking-widest text-gray-400 hover:text-accent"
-      >
-        HOME
-      </Link>
-      <div className="absolute bottom-2 left-2 text-xs text-gray-500 z-30">
-        SANDBOX — no real money moves.
+      <div className="absolute bottom-2 left-3 z-30 font-mono text-[10px] tracking-widest text-muted uppercase">
+        Sandbox — no real money moves
       </div>
     </main>
   );
