@@ -1,0 +1,65 @@
+{
+  "counterparties": [
+    { "id": "cp_mainbank_uk",   "name": "MainBank UK",        "type": "bank",     "provider": "mainbank_uk", "region": "UK",   "lat": 51.5074, "lng": -0.1278,  "specter_id": null,            "health_tag": "stable",  "max_exposure_pct": 0.40 },
+    { "id": "cp_mainbank_eu",   "name": "MainBank EU",        "type": "bank",     "provider": "mainbank_eu", "region": "EU",   "lat": 50.1109, "lng":  8.6821,  "specter_id": null,            "health_tag": "stable",  "max_exposure_pct": 0.40 },
+    { "id": "cp_mainbank_us",   "name": "MainBank US",        "type": "bank",     "provider": "mainbank_us", "region": "US",   "lat": 40.7128, "lng": -74.0060, "specter_id": null,            "health_tag": "stable",  "max_exposure_pct": 0.40 },
+    { "id": "cp_neobank_x",     "name": "Neobank X",          "type": "bank",     "provider": "neobank_x",   "region": "EU",   "lat": 52.5200, "lng": 13.4050,  "specter_id": "spec_neox",     "health_tag": "watch",   "max_exposure_pct": 0.25 },
+    { "id": "cp_yield_y",       "name": "YieldPlatform Y",    "type": "bank",     "provider": "yield_y",     "region": "EU",   "lat": 49.6116, "lng":  6.1319,  "specter_id": "spec_yieldy",   "health_tag": "stable",  "max_exposure_pct": 0.15 },
+
+    { "id": "cp_aws",           "name": "Amazon Web Services","type": "vendor",   "provider": "aws",         "region": "US",   "lat": 47.6062, "lng": -122.3321, "specter_id": "spec_aws",     "health_tag": "stable",  "max_exposure_pct": 1.00 },
+    { "id": "cp_stripe",        "name": "Stripe Inc",         "type": "vendor",   "provider": "stripe",      "region": "US",   "lat": 37.7749, "lng": -122.4194, "specter_id": "spec_stripe",  "health_tag": "stable",  "max_exposure_pct": 1.00 },
+    { "id": "cp_anthropic",     "name": "Anthropic PBC",      "type": "vendor",   "provider": "anthropic",   "region": "US",   "lat": 37.7749, "lng": -122.4194, "specter_id": "spec_anth",    "health_tag": "stable",  "max_exposure_pct": 1.00 },
+    { "id": "cp_googleads",     "name": "Google Ads",         "type": "vendor",   "provider": "googleads",   "region": "US",   "lat": 37.4220, "lng": -122.0841, "specter_id": "spec_goog",    "health_tag": "stable",  "max_exposure_pct": 1.00 },
+    { "id": "cp_wework",        "name": "WeWork UK",          "type": "vendor",   "provider": "wework",      "region": "UK",   "lat": 51.5155, "lng": -0.0922,   "specter_id": "spec_wework",  "health_tag": "watch",   "max_exposure_pct": 1.00 },
+    { "id": "cp_strp_comm_eu",  "name": "STRP-COMM-EU Ltd",   "type": "vendor",   "provider": "strp_comm_eu","region": "EU",   "lat": 53.3498, "lng": -6.2603,   "specter_id": "spec_strp",    "health_tag": "fragile", "max_exposure_pct": 0.05 },
+
+    { "id": "cp_acme_retail",   "name": "Acme Retail Group",  "type": "customer", "provider": "acme",        "region": "UK",   "lat": 53.4808, "lng": -2.2426,   "specter_id": "spec_acme",    "health_tag": "stable",  "max_exposure_pct": 1.00 },
+    { "id": "cp_globex",        "name": "Globex Industries",  "type": "customer", "provider": "globex",      "region": "EU",   "lat": 48.8566, "lng":  2.3522,   "specter_id": "spec_globex",  "health_tag": "watch",   "max_exposure_pct": 1.00 },
+    { "id": "cp_initech",       "name": "Initech Software",   "type": "customer", "provider": "initech",     "region": "US",   "lat": 30.2672, "lng": -97.7431,  "specter_id": "spec_init",    "health_tag": "stable",  "max_exposure_pct": 1.00 }
+  ],
+
+  "accounts": [
+    { "id": "acc_uk_op",  "counterparty_id": "cp_mainbank_uk", "name": "MainBank UK – Operating", "currency": "GBP", "balance": 2100000, "region": "UK" },
+    { "id": "acc_eu_op",  "counterparty_id": "cp_mainbank_eu", "name": "MainBank EU – Operating", "currency": "EUR", "balance": 1450000, "region": "EU" },
+    { "id": "acc_us_op",  "counterparty_id": "cp_mainbank_us", "name": "MainBank US – Operating", "currency": "USD", "balance": 1850000, "region": "US" },
+    { "id": "acc_neox",   "counterparty_id": "cp_neobank_x",   "name": "Neobank X – Multi",       "currency": "EUR", "balance": 2100000, "region": "EU" },
+    { "id": "acc_yield",  "counterparty_id": "cp_yield_y",     "name": "YieldPlatform Y – Fund",  "currency": "EUR", "balance":  650000, "region": "EU" }
+  ],
+
+  "transactions": [
+    { "id": "tx_seed_1", "direction": "out", "counterparty_id": "cp_aws",       "account_id": "acc_us_op", "amount":  18420, "currency": "USD", "status": "posted",              "description": "AWS – us-east-1 monthly",       "occurred_at": "2026-04-29T08:00:00Z" },
+    { "id": "tx_seed_2", "direction": "out", "counterparty_id": "cp_stripe",    "account_id": "acc_uk_op", "amount":   2400, "currency": "GBP", "status": "posted",              "description": "Stripe – fees",                 "occurred_at": "2026-04-29T09:00:00Z" },
+    { "id": "tx_seed_3", "direction": "out", "counterparty_id": "cp_googleads", "account_id": "acc_us_op", "amount":  12000, "currency": "USD", "status": "posted",              "description": "Google Ads – April spend",      "occurred_at": "2026-04-30T07:30:00Z" },
+    { "id": "tx_seed_4", "direction": "in",  "counterparty_id": "cp_acme_retail","account_id": "acc_uk_op","amount":  84500, "currency": "GBP", "status": "posted",              "description": "INV-2026-0412",                 "occurred_at": "2026-04-30T10:15:00Z" },
+    { "id": "tx_seed_5", "direction": "in",  "counterparty_id": "cp_globex",    "account_id": "acc_eu_op", "amount": 180000, "currency": "EUR", "status": "scheduled",           "description": "INV-2026-0418 (expected)",      "occurred_at": "2026-05-05T00:00:00Z" }
+  ],
+
+  "specter_profiles": {
+    "spec_neox":    { "company": "Neobank X",        "headcount": 78,  "headcount_delta_90d_pct": -32, "last_funding_round_date": "2023-12-15", "last_funding_round_amount_musd": 18,  "investors": ["Frontline VC", "Series A Capital"], "news_flags": ["CFO departure (2026-04-12)"], "incorporated": "2019-07-21", "website": "https://neobankx.example", "address": "Friedrichstrasse 200, 10117 Berlin, DE" },
+    "spec_yieldy":  { "company": "YieldPlatform Y",  "headcount": 42,  "headcount_delta_90d_pct":   3, "last_funding_round_date": "2025-10-01", "last_funding_round_amount_musd": 25,  "investors": ["Index Ventures"],                    "news_flags": [],                                   "incorporated": "2020-03-11", "website": "https://yieldy.example",   "address": "10 boulevard Royal, L-2449 Luxembourg" },
+    "spec_aws":     { "company": "Amazon Web Services","headcount": 1500000,"headcount_delta_90d_pct": 1, "last_funding_round_date": null, "last_funding_round_amount_musd": null, "investors": [], "news_flags": [], "incorporated": "2006-03-14", "website": "https://aws.amazon.com", "address": "410 Terry Ave N, Seattle, WA" },
+    "spec_stripe":  { "company": "Stripe Inc",       "headcount": 8000,"headcount_delta_90d_pct":   2, "last_funding_round_date": "2024-02-14", "last_funding_round_amount_musd": 6500,"investors": ["Sequoia", "a16z"],                  "news_flags": [],                                   "incorporated": "2010-09-12", "website": "https://stripe.com",       "address": "354 Oyster Point Blvd, South San Francisco, CA" },
+    "spec_anth":    { "company": "Anthropic PBC",    "headcount": 1100,"headcount_delta_90d_pct":  18, "last_funding_round_date": "2025-08-20", "last_funding_round_amount_musd": 4000,"investors": ["Google", "Amazon"],                 "news_flags": [],                                   "incorporated": "2021-01-01", "website": "https://anthropic.com",    "address": "548 Market St, San Francisco, CA" },
+    "spec_goog":    { "company": "Google",           "headcount": 180000,"headcount_delta_90d_pct":  0, "last_funding_round_date": null,         "last_funding_round_amount_musd": null,"investors": [],                                   "news_flags": [],                                   "incorporated": "1998-09-04", "website": "https://google.com",       "address": "1600 Amphitheatre Pkwy, Mountain View, CA" },
+    "spec_wework":  { "company": "WeWork UK",        "headcount": 240, "headcount_delta_90d_pct": -12, "last_funding_round_date": "2023-05-10", "last_funding_round_amount_musd": 30,  "investors": ["SoftBank"],                          "news_flags": ["Restructuring announced"],          "incorporated": "2015-04-22", "website": "https://wework.com",       "address": "1 Poultry, London EC2R 8EJ" },
+    "spec_strp":    { "company": "STRP-COMM-EU Ltd", "headcount": 1,   "headcount_delta_90d_pct":   0, "last_funding_round_date": null,         "last_funding_round_amount_musd": null,"investors": [],                                   "news_flags": ["Newly incorporated", "Address shared with 3 prior shell flags"], "incorporated": "2025-12-18", "website": null, "address": "27 Lower Mount Street, Dublin 2, IE" },
+    "spec_acme":    { "company": "Acme Retail Group","headcount": 1200,"headcount_delta_90d_pct":   1, "last_funding_round_date": null,         "last_funding_round_amount_musd": null,"investors": [],                                   "news_flags": [],                                   "incorporated": "1998-06-30", "website": "https://acme.example",     "address": "Trafford Park, Manchester M17 8PR" },
+    "spec_globex":  { "company": "Globex Industries","headcount": 540, "headcount_delta_90d_pct": -22, "last_funding_round_date": "2024-09-12", "last_funding_round_amount_musd": 60,  "investors": ["Atomico"],                           "news_flags": ["Layoffs announced 2026-04-25"],     "incorporated": "2008-11-04", "website": "https://globex.example",   "address": "12 rue de Rivoli, 75001 Paris" },
+    "spec_init":    { "company": "Initech Software","headcount": 110, "headcount_delta_90d_pct":   8, "last_funding_round_date": "2025-11-18", "last_funding_round_amount_musd": 22,  "investors": ["Bessemer"],                          "news_flags": [],                                   "incorporated": "2017-04-01", "website": "https://initech.example",  "address": "100 Congress Ave, Austin, TX" }
+  },
+
+  "policy": {
+    "min_global_runway_months": 12,
+    "min_runway_days_per_region": { "UK": 30, "EU": 30, "US": 30, "APAC": 30 },
+    "global_daily_burn_base":    35000,
+    "regional_daily_burn_base":  { "UK": 12000, "EU": 11000, "US": 12000, "APAC": 0 },
+    "base_fx_rates":             { "GBP": 1.25, "EUR": 1.10, "USD": 1.00 },
+    "auto_transfer_threshold_base": 50000
+  },
+
+  "shell_flag_history": [
+    { "id": "shell_1", "name": "RAPID-SVC-IE Ltd",   "address": "27 Lower Mount Street, Dublin 2, IE", "flagged_at": "2025-09-04" },
+    { "id": "shell_2", "name": "QUICKPAY-EU Ltd",    "address": "27 Lower Mount Street, Dublin 2, IE", "flagged_at": "2025-11-21" },
+    { "id": "shell_3", "name": "EUROSETTLE Ltd",     "address": "27 Lower Mount Street, Dublin 2, IE", "flagged_at": "2026-02-09" }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "agent-svc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node --import tsx src/index.ts"
+  },
+  "dependencies": {
+    "@cursor/sdk": "latest",
+    "express": "4.21.0",
+    "ws": "8.18.0",
+    "dotenv": "16.4.5"
+  },
+  "devDependencies": {
+    "tsx": "4.19.1",
+    "typescript": "5.6.2",
+    "@types/express": "4.17.21",
+    "@types/ws": "8.5.12",
+    "@types/node": "22.7.4"
+  }
+}

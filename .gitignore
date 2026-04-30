@@ -1,0 +1,34 @@
+# Node
+node_modules/
+.next/
+dist/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local data
+api/data/*.db
+api/data/*.db-journal
+*.sqlite
+*.sqlite3
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

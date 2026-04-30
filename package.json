@@ -1,0 +1,20 @@
+{
+  "name": "counterparty-risk-radar",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cursor x Briefcase London 2026 - Track 02 Financial Intelligence",
+  "scripts": {
+    "install:all": "npm install && npm --prefix web install && npm --prefix agent-svc install && pip install -r api/requirements.txt",
+    "dev": "concurrently -n api,web,svc -c blue,green,magenta \"npm:dev:api\" \"npm:dev:web\" \"npm:dev:svc\"",
+    "dev:api": "cd api && python -m uvicorn app.main:app --reload --port 8000",
+    "dev:web": "npm --prefix web run dev",
+    "dev:svc": "npm --prefix agent-svc run dev",
+    "seed": "cd api && python -m app.seed",
+    "demo:bank": "curl -X POST http://localhost:8000/demo/trigger/bank-downgrade",
+    "demo:vendor": "curl -X POST http://localhost:8000/demo/trigger/queue-vendor-payment",
+    "demo:customer": "curl -X POST http://localhost:8000/demo/trigger/customer-turn"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}

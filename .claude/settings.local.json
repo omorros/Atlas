@@ -9,7 +9,9 @@
       "WebFetch(domain:lushbinary.com)",
       "Bash(gh repo *)",
       "Bash(gh api *)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(python -c ' *)",
+      "Bash(node -e ' *)"
     ]
   }
 }
