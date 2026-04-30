@@ -23,18 +23,11 @@ export default function Globe({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const styleLoadedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
-  const [debug, setDebug] = useState<{ stage: string; tokenLen: number; w: number; h: number }>(
-    { stage: "init", tokenLen: 0, w: 0, h: 0 }
-  );
 
   // Init map
   useEffect(() => {
-    console.log("[mapbox] effect running, ref.current?", !!ref.current, "mapRef?", !!mapRef.current);
     if (!ref.current || mapRef.current) return;
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    const rect = ref.current.getBoundingClientRect();
-    setDebug((d) => ({ ...d, stage: "token-check", tokenLen: token?.length ?? 0, w: rect.width, h: rect.height }));
-    console.log("[mapbox] token length:", token?.length, "container size:", rect.width, "x", rect.height);
     if (!token) {
       setError("NEXT_PUBLIC_MAPBOX_TOKEN missing in web/.env");
       return;
@@ -42,7 +35,6 @@ export default function Globe({
     mapboxgl.accessToken = token;
     let map: mapboxgl.Map;
     try {
-      console.log("[mapbox] constructing map...");
       map = new mapboxgl.Map({
         container: ref.current,
         style: "mapbox://styles/mapbox/dark-v11",
@@ -51,8 +43,6 @@ export default function Globe({
         zoom: 1.4,
         attributionControl: false,
       });
-      setDebug((d) => ({ ...d, stage: "constructed" }));
-      console.log("[mapbox] constructed OK");
     } catch (e: any) {
       console.error("[mapbox] construction failed", e);
       setError(`Mapbox failed to initialize: ${e?.message ?? e}`);
@@ -81,8 +71,6 @@ export default function Globe({
     map.on("style.load", () => {
       styleLoadedRef.current = true;
       clearTimeout(loadTimeout);
-      setDebug((d) => ({ ...d, stage: "style-loaded" }));
-      console.log("[mapbox] style.load fired");
       map.setFog({
         color: "rgb(28, 36, 48)",
         "high-color": "rgb(60, 80, 105)",
@@ -250,9 +238,6 @@ export default function Globe({
   return (
     <>
       <div ref={ref} style={{ position: "absolute", top: 0, right: 0, bottom: 0, left: 0, background: "#020408" }} />
-      <div className="absolute top-14 left-3 z-[40] font-mono text-[10px] text-yellow-300 bg-black/70 px-2 py-1 rounded pointer-events-none">
-        [mapbox debug] stage={debug.stage} · token={debug.tokenLen}ch · size={Math.round(debug.w)}×{Math.round(debug.h)}
-      </div>
       {error && (
         <div className="absolute inset-0 z-[5] flex items-center justify-center px-6 pointer-events-none">
           <div className="relative pointer-events-auto max-w-lg w-full px-7 py-6 bg-panel/95 border border-crit/40 rounded-sm shadow-[0_20px_60px_-20px_rgba(0,0,0,0.7)]">
