@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import type { Counterparty, RiskEvent, Transaction } from "@/lib/types";
 
 const COLOURS: Record<string, string> = {
-  stable: "#22c55e",
-  watch: "#f59e0b",
-  fragile: "#ef4444",
+  stable: "#86a99a",
+  watch: "#d8a85b",
+  fragile: "#d97757",
 };
 
 export default function Globe({
@@ -22,13 +22,14 @@ export default function Globe({
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const styleLoadedRef = useRef(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Init map
   useEffect(() => {
     if (!ref.current || mapRef.current) return;
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) {
-      console.warn("NEXT_PUBLIC_MAPBOX_TOKEN missing - globe will not render.");
+      setError("NEXT_PUBLIC_MAPBOX_TOKEN missing in web/.env");
       return;
     }
     mapboxgl.accessToken = token;
@@ -38,6 +39,16 @@ export default function Globe({
       projection: { name: "globe" },
       center: [0, 30],
       zoom: 1.4,
+    });
+    map.on("error", (e) => {
+      const msg = (e as any)?.error?.message || (e as any)?.message || "unknown Mapbox error";
+      const status = (e as any)?.error?.status;
+      console.error("[mapbox]", e);
+      if (status === 401 || /401|unauthor/i.test(msg)) {
+        setError("Mapbox returned 401 — token invalid or truncated. Re-copy from account.mapbox.com.");
+      } else {
+        setError(`Mapbox error: ${msg}`);
+      }
     });
     map.on("style.load", () => {
       styleLoadedRef.current = true;
@@ -207,9 +218,12 @@ export default function Globe({
 
   return (
     <div ref={ref} className="absolute inset-0">
-      {!process.env.NEXT_PUBLIC_MAPBOX_TOKEN && (
-        <div className="absolute inset-0 flex items-center justify-center text-gray-400 text-sm">
-          Add NEXT_PUBLIC_MAPBOX_TOKEN to web/.env to render the globe.
+      {error && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="max-w-md mx-auto px-6 py-4 bg-panel/95 border border-crit/40 rounded-sm font-mono text-[11px] tracking-widest uppercase text-crit text-center">
+            <div className="text-paper-dim mb-2">Globe failed to load</div>
+            <div className="normal-case tracking-normal text-sm">{error}</div>
+          </div>
         </div>
       )}
     </div>

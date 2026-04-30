@@ -1,7 +1,7 @@
 import "./globals.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { Metadata } from "next";
-import { Instrument_Serif, Geist_Mono, Geist } from "next/font/google";
+import { Instrument_Serif, JetBrains_Mono, Inter } from "next/font/google";
 
 const display = Instrument_Serif({
   subsets: ["latin"],
@@ -11,13 +11,13 @@ const display = Instrument_Serif({
   display: "swap",
 });
 
-const sans = Geist({
+const sans = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
 });
 
-const mono = Geist_Mono({
+const mono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
   display: "swap",
