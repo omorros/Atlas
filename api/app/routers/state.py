@@ -15,6 +15,7 @@ from ..db import (
     TransactionRow,
     get_session,
 )
+from ..llm_metrics import get_llm_spend_usd
 
 router = APIRouter()
 
@@ -50,7 +51,7 @@ async def get_state(s: AsyncSession = Depends(get_session)) -> dict:
         ).scalars()
     ]
 
-    metrics = compute_metrics(accounts, open_events, recent_briefs)
+    metrics = compute_metrics(accounts, open_events, recent_briefs, one_hour_ago)
     return {
         "counterparties": counterparties,
         "accounts": accounts,
@@ -61,7 +62,9 @@ async def get_state(s: AsyncSession = Depends(get_session)) -> dict:
     }
 
 
-def compute_metrics(accounts: list[dict], open_events: list[dict], briefs: list[dict]) -> dict:
+def compute_metrics(
+    accounts: list[dict], open_events: list[dict], briefs: list[dict], since
+) -> dict:
     # Hardcoded base FX & burn for the demo. TODO(A): pull from policy.
     fx = {"GBP": 1.25, "EUR": 1.10, "USD": 1.00}
     daily_burn_base = 35000
@@ -76,11 +79,19 @@ def compute_metrics(accounts: list[dict], open_events: list[dict], briefs: list[
         )
     largest_pct = max(by_provider.values()) / total_base if total_base else 0
 
+    def _brief_recent(b: dict) -> bool:
+        c = b.get("created_at")
+        if c is None:
+            return False
+        if getattr(c, "tzinfo", None) is None:
+            c = c.replace(tzinfo=timezone.utc)
+        return c >= since
+
     return {
         "total_cash_base": round(total_base, 2),
         "global_runway_months": round(runway_months, 2),
         "largest_provider_exposure_pct": round(largest_pct, 4),
         "open_critical_count": sum(1 for e in open_events if e["severity"] == "critical"),
-        "briefs_last_hour": len(briefs),
-        "llm_spend_usd": 0.0,  # TODO(B): track in workers.
+        "briefs_last_hour": sum(1 for b in briefs if _brief_recent(b)),
+        "llm_spend_usd": get_llm_spend_usd(),
     }

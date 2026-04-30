@@ -7,13 +7,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .routers import demo, risk_events, state, ws
+from .rules import ALL_RULES
+from .rules.base import RuleEngine
 from .seed import seed_if_empty
+
+_rule_engine = RuleEngine(ALL_RULES, tick_seconds=5.0)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await seed_if_empty()
-    # TODO(B): start the rule engine background task here once rules are wired.
+    _rule_engine.start()
     # TODO(A): start the transaction simulator background task here.
     yield
 

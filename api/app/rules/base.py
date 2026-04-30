@@ -1,22 +1,16 @@
-"""Rule engine framework. Owner: B.
-
-Each rule is a class with `name` and an async `evaluate(state) -> list[RiskEventCandidate]`.
-The Engine ticks every N seconds, gathers candidates, hands them to the triage worker,
-which decides which become real RiskEvents.
-"""
+"""Rule engine framework. Owner: B."""
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+import logging
 from typing import Any, Protocol
 
+from ..db import SessionLocal
+from ..risk_pipeline import process_rule_candidates
+from .candidate import RiskEventCandidate
+from .engine_state import load_engine_state
 
-@dataclass
-class RiskEventCandidate:
-    counterparty_id: str
-    trigger_rule: str
-    trigger_payload: dict[str, Any] = field(default_factory=dict)
-    raw_score: float = 0.0
+logger = logging.getLogger(__name__)
 
 
 class Rule(Protocol):
@@ -31,19 +25,16 @@ class RuleEngine:
         self.tick_seconds = tick_seconds
         self._task: asyncio.Task | None = None
 
-    async def _load_state(self) -> dict:
-        # TODO(B): query DB for current snapshot the rules need
-        return {}
-
     async def _tick(self) -> None:
-        state = await self._load_state()
+        async with SessionLocal() as session:
+            state = await load_engine_state(session, self.tick_seconds)
         candidates: list[RiskEventCandidate] = []
         for rule in self.rules:
             try:
                 candidates.extend(await rule.evaluate(state))
             except Exception as e:
-                print(f"[rule {rule.name}] error: {e}")
-        # TODO(B): hand off to triage worker, then analyst, then persist + publish.
+                logger.exception("rule %s error: %s", rule.name, e)
+        await process_rule_candidates(candidates)
 
     async def run(self) -> None:
         while True:

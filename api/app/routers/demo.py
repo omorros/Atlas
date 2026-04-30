@@ -35,8 +35,6 @@ async def trigger_bank_downgrade(s: AsyncSession = Depends(get_session)) -> dict
             "profile_json": cp.profile_json,
         },
     })
-    # TODO(B): rule engine should pick this up on next tick. For demo, manual nudge:
-    # from ..rules.r1_specter_delta import evaluate_for; await evaluate_for(cp.id)
     return {"ok": True, "counterparty_id": cp.id}
 
 
@@ -66,7 +64,6 @@ async def trigger_vendor_payment(s: AsyncSession = Depends(get_session)) -> dict
             "occurred_at": tx.occurred_at.isoformat(),
         },
     })
-    # TODO(B): rule engine should fire R3 + R4 next tick.
     return {"ok": True, "transaction_id": tx.id}
 
 

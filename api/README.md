@@ -23,13 +23,15 @@ DB seeds itself from `shared/fixtures.json` on first boot. SQLite file lives at 
 | `app/routers/ws.py` — `WS /events/stream` | ✅ wired | A |
 | `app/events.py` — in-process EventBus | ✅ wired | A |
 | `app/simulator.py` — background txns | ✅ wired (not started in lifespan yet) | A |
-| `app/rules/r1_specter_delta.py` | ⏳ stub | B |
-| `app/rules/r3_new_counterparty.py` | ⏳ stub | B |
-| `app/rules/r4_anomalous_payment.py` | ⏳ stub | B |
-| `app/rules/base.py` — engine loop | ✅ framework / ⏳ wire to workers | B |
-| `app/workers/triage.py` — Haiku call | ⏳ stub (fallback to keep=True) | B |
-| `app/workers/analyst.py` — Sonnet call | ⏳ stub (fallback brief) | B |
-| `app/workers/embeddings.py` — OpenAI + cosine | ⏳ stub | B |
+| `app/rules/r1_specter_delta.py` | ✅ R1 | B |
+| `app/rules/r2_standing_exposure.py` | ✅ R2 | B |
+| `app/rules/r3_new_counterparty.py` | ✅ R3 | B |
+| `app/rules/r4_anomalous_payment.py` | ✅ R4 | B |
+| `app/rules/base.py` + `risk_pipeline.py` | ✅ 5s tick → triage → analyst → persist + WS | B |
+| `app/workers/triage.py` — Haiku | ✅ (fallback keep=True if no key) | B |
+| `app/workers/analyst.py` — Sonnet | ✅ (fallback brief if no key) | B |
+| `app/workers/embeddings.py` — OpenAI + cosine | ✅ similar-flags corpus (watch/fragile + shells) | B |
+| `../scripts/eval_risk_harness.py` | ✅ sample R3 path | B |
 | `app/specter/client.py` — REST + canned fallback | ⏳ stub (canned works) | D |
 
 ## TODO markers
