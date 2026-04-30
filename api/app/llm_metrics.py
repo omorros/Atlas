@@ -1,6 +1,7 @@
 """Rough cumulative LLM spend estimate for GET /state metrics."""
 from __future__ import annotations
 
+import asyncio
 import threading
 
 _lock = threading.Lock()
@@ -18,6 +19,22 @@ _RATES: dict[str, tuple[float, float]] = {
 }
 
 
+def reset_llm_spend_usd() -> None:
+    global _usd
+    with _lock:
+        _usd = 0.0
+
+
+def _schedule_metrics_broadcast() -> None:
+    try:
+        from .routers.state import publish_metrics_to_ws
+
+        loop = asyncio.get_running_loop()
+        loop.create_task(publish_metrics_to_ws())
+    except RuntimeError:
+        pass
+
+
 def record_tokens(model: str, tokens_in: int, tokens_out: int) -> None:
     global _usd
     rin, rout = _RATES.get(model, (3.0, 15.0))
@@ -26,6 +43,7 @@ def record_tokens(model: str, tokens_in: int, tokens_out: int) -> None:
         cost = (tokens_in / 1_000_000.0) * _RATES["text-embedding-3-large"][0]
     with _lock:
         _usd += cost
+    _schedule_metrics_broadcast()
 
 
 def get_llm_spend_usd() -> float:

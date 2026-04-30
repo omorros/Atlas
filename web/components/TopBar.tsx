@@ -8,6 +8,7 @@ export default function TopBar({ metrics }: { metrics: Metrics | null }) {
       <Stat label="Largest exposure" value={metrics ? `${(metrics.largest_provider_exposure_pct * 100).toFixed(0)}%` : "—"} />
       <Stat label="Critical open" value={metrics ? String(metrics.open_critical_count) : "—"} />
       <Stat label="Briefs / hr" value={metrics ? String(metrics.briefs_last_hour) : "—"} />
+      <Stat label="Burn/d (cal)" value={metrics ? `$${metrics.daily_burn_calibrated_usd.toLocaleString()}` : "—"} />
       <Stat label="LLM spend" value={metrics ? `$${metrics.llm_spend_usd.toFixed(2)}` : "—"} />
     </header>
   );

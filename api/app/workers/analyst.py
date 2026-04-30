@@ -12,6 +12,7 @@ import anthropic
 
 from ..config import settings
 from ..llm_metrics import record_tokens
+from ..llm_retry import call_with_rate_limit_retry
 
 MODEL = settings.ANTHROPIC_ANALYST_MODEL
 SYSTEM = """You are a senior treasury analyst. Given a triggered risk event with full
@@ -61,12 +62,15 @@ async def write_brief(event: dict[str, Any], context: dict[str, Any]) -> dict[st
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
     t0 = time.perf_counter()
     try:
-        msg = await client.messages.create(
-            model=MODEL,
-            max_tokens=1024,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": user_msg}],
-        )
+        async def invoke():
+            return await client.messages.create(
+                model=MODEL,
+                max_tokens=1024,
+                system=SYSTEM,
+                messages=[{"role": "user", "content": user_msg}],
+            )
+
+        msg = await call_with_rate_limit_retry(invoke)
     except Exception:
         return _fallback_brief(event, context)
 

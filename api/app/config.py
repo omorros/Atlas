@@ -26,6 +26,16 @@ class Settings:
     FIXTURES_PATH: Path = SHARED_DIR / "fixtures.json"
     DATA_DIR: Path = Path(__file__).parent.parent / "data"
 
+    # Spine: optional `X-Internal-Token` for `/internal/*`
+    INTERNAL_TOKEN: str | None = os.getenv("INTERNAL_TOKEN") or None
+    # If false, `POST /demo/reset` returns 403.
+    DEMO_RESET_ENABLED: bool = os.getenv("DEMO_RESET_ENABLED", "1") not in ("0", "false", "False")
+
+    # Runway: blend observed outbound burn (rolling window) with policy/min floors
+    METRICS_POLICY_DAILY_BURN_USD: float = float(os.getenv("METRICS_POLICY_DAILY_BURN_USD", "35000"))
+    METRICS_MIN_DAILY_BURN_USD: float = float(os.getenv("METRICS_MIN_DAILY_BURN_USD", "2000"))
+    METRICS_BURN_LOOKBACK_DAYS: int = int(os.getenv("METRICS_BURN_LOOKBACK_DAYS", "30"))
+
     # Feature flags / safety
     HAS_ANTHROPIC: bool = property(lambda s: bool(s.ANTHROPIC_API_KEY))  # type: ignore
     HAS_OPENAI: bool = property(lambda s: bool(s.OPENAI_API_KEY))  # type: ignore

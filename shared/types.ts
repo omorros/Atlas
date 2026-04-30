@@ -117,6 +117,8 @@ export interface Metrics {
   open_critical_count: number;
   briefs_last_hour: number;
   llm_spend_usd: number;
+  daily_burn_calibrated_usd: number;
+  observed_daily_outflow_usd: number;
 }
 
 export interface StateResponse {

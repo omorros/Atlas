@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..db import CounterpartyRow
 from ..llm_metrics import record_tokens
+from ..llm_retry import call_with_rate_limit_retry
 
 MODEL = "text-embedding-3-large"
 
@@ -34,7 +35,11 @@ async def embed(text: str) -> list[float] | None:
     if not text:
         return None
     client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-    resp = await client.embeddings.create(model=MODEL, input=text)
+
+    async def invoke():
+        return await client.embeddings.create(model=MODEL, input=text)
+
+    resp = await call_with_rate_limit_retry(invoke)
     vec = list(resp.data[0].embedding)
     usage = getattr(resp, "usage", None)
     if usage is not None:

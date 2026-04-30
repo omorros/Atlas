@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..config import settings
 from ..db import CounterpartyRow
 from ..llm_metrics import record_tokens
+from ..llm_retry import call_with_rate_limit_retry
 
 MODEL = settings.ANTHROPIC_TRIAGE_MODEL
 SYSTEM = """You are the triage layer in a counterparty risk system. You receive a rule
@@ -54,12 +55,15 @@ async def triage(
     client = anthropic.AsyncAnthropic(api_key=settings.ANTHROPIC_API_KEY)
     t0 = time.perf_counter()
     try:
-        msg = await client.messages.create(
-            model=MODEL,
-            max_tokens=256,
-            system=SYSTEM,
-            messages=[{"role": "user", "content": user_payload}],
-        )
+        async def invoke():
+            return await client.messages.create(
+                model=MODEL,
+                max_tokens=256,
+                system=SYSTEM,
+                messages=[{"role": "user", "content": user_payload}],
+            )
+
+        msg = await call_with_rate_limit_retry(invoke)
     except Exception as e:
         return {"keep": True, "reason": f"triage error — default keep: {e}"}
 

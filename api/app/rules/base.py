@@ -44,3 +44,12 @@ class RuleEngine:
     def start(self) -> None:
         if self._task is None or self._task.done():
             self._task = asyncio.create_task(self.run())
+
+    async def shutdown(self) -> None:
+        if self._task and not self._task.done():
+            self._task.cancel()
+            try:
+                await self._task
+            except asyncio.CancelledError:
+                pass
+            self._task = None

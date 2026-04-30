@@ -126,6 +126,8 @@ class Metrics(BaseModel):
     open_critical_count: int
     briefs_last_hour: int
     llm_spend_usd: float
+    daily_burn_calibrated_usd: float = 0.0
+    observed_daily_outflow_usd: float = 0.0
 
 
 class StateResponse(BaseModel):
