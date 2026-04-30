@@ -1,94 +1,151 @@
 import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import Grain from "@/components/atlas/Grain";
+import Particles from "@/components/atlas/Particles";
+import BlurFade from "@/components/atlas/BlurFade";
+import NumberTicker from "@/components/atlas/NumberTicker";
+import AnimatedBeam from "@/components/atlas/AnimatedBeam";
+import AtlasMark from "@/components/atlas/AtlasMark";
+import Compass from "@/components/atlas/Compass";
 
 export default function Landing() {
   return (
-    <main className="relative min-h-screen w-full overflow-hidden bg-bg text-gray-100 font-mono">
-      {/* Top-left wordmark */}
-      <div className="absolute top-6 left-8 text-sm tracking-[0.2em] font-semibold">
-        RADAR<span className="text-accent">_</span>
-      </div>
+    <main className="relative h-screen min-h-[640px] w-full overflow-hidden bg-bg text-paper flex flex-col">
+      <Grain />
+      <Particles />
+      <div aria-hidden className="absolute inset-0 latlong z-0" />
 
-      {/* Soft radial backdrop */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-60"
-        style={{
-          background:
-            "radial-gradient(60% 50% at 50% 38%, rgba(125, 211, 252, 0.10) 0%, rgba(10, 13, 18, 0) 70%)",
-        }}
-      />
+      {/* Top chrome */}
+      <header className="relative z-20 shrink-0 flex items-center justify-between px-8 pt-5 md:px-14 md:pt-6 font-mono text-[10px] tracking-widest uppercase text-paper-dim">
+        <BlurFade delay={0.05} className="flex items-center gap-3">
+          <Compass size={18} />
+          <span className="text-paper">Atlas</span>
+          <span className="text-muted">/ Counterparty Intelligence</span>
+        </BlurFade>
+        <BlurFade delay={0.15} className="hidden md:flex items-center gap-6">
+          <span className="text-muted">L · 51.5074°N 0.1278°W</span>
+          <span className="text-muted">v0.1.0</span>
+          <span className="inline-flex items-center gap-2 text-ok">
+            <span className="block h-1.5 w-1.5 rounded-full bg-ok animate-pulse-soft" />
+            Sandbox
+          </span>
+        </BlurFade>
+      </header>
 
-      {/* Center hero */}
-      <section className="relative z-10 flex min-h-screen flex-col items-center justify-center px-6 pb-32 pt-20">
-        <h1
-          className="text-center text-[14vw] md:text-[10vw] font-extrabold leading-none tracking-tight"
-          style={{ textShadow: "0 0 60px rgba(125, 211, 252, 0.45)" }}
-        >
-          RADAR
-        </h1>
+      {/* Hero — flex-1 fills remaining vertical space */}
+      <section className="relative z-10 flex-1 min-h-0 flex items-center px-8 md:px-14">
+        <div className="grid grid-cols-12 gap-6 w-full max-w-7xl mx-auto">
+          {/* Left rail — section index */}
+          <div className="hidden md:flex col-span-2 flex-col gap-4 self-center pt-2 font-mono text-[10px] tracking-widest text-muted">
+            <BlurFade delay={0.5}><div>I &nbsp; OVERVIEW</div></BlurFade>
+            <BlurFade delay={0.6}><div className="text-paper">II &nbsp; ENTRY</div></BlurFade>
+            <BlurFade delay={0.7}><div>III &nbsp; PIPELINE</div></BlurFade>
+            <BlurFade delay={0.8}><div>IV &nbsp; CREDITS</div></BlurFade>
+          </div>
 
-        <p className="mt-3 text-center text-[10px] md:text-xs tracking-[0.3em] text-gray-400 uppercase">
-          Counterparty risk intelligence for treasury · Track 02
-        </p>
+          {/* Center */}
+          <div className="col-span-12 md:col-span-8 flex flex-col items-center text-center">
+            <BlurFade delay={0.3} className="font-mono text-[10px] tracking-[0.4em] text-paper-dim mb-3">
+              EST. 2026 — LONDON
+            </BlurFade>
 
-        {/* Stat counters */}
-        <div className="mt-10 grid grid-cols-4 gap-10 md:gap-16">
-          <Stat n="5" label="Banks" />
-          <Stat n="6" label="Vendors" />
-          <Stat n="3" label="Customers" />
-          <Stat n="4" label="Models" />
+            <AtlasMark />
+
+            <BlurFade delay={0.95} className="mt-4">
+              <p className="font-display italic text-xl md:text-2xl text-paper-dim leading-snug">
+                A new cartography of counterparty risk.
+              </p>
+              <p className="mt-2 font-mono text-[10px] tracking-widest uppercase text-muted">
+                Read · score · escalate · the agent never moves money
+              </p>
+            </BlurFade>
+
+            <BlurFade delay={1.15} className="mt-8 grid grid-cols-4 gap-10 md:gap-16 border-y border-border/60 py-4">
+              <Stat n={5}  label="Banks" />
+              <Stat n={6}  label="Vendors" />
+              <Stat n={3}  label="Customers" />
+              <Stat n={4}  label="Models" />
+            </BlurFade>
+
+            <BlurFade delay={1.45} className="mt-8 flex items-center gap-5">
+              <Link
+                href="/app"
+                className="group relative inline-flex items-center gap-3 rounded-full border border-accent/50 bg-accent/5 px-7 py-2.5 font-mono text-[11px] tracking-[0.3em] uppercase text-paper transition-all hover:bg-accent/15 hover:border-accent hover:shadow-[0_0_40px_-10px_rgba(201,168,110,0.6)]"
+              >
+                Open Atlas
+                <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+              <Link
+                href="https://github.com/omorros/Cursor-hack"
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-[11px] tracking-widest uppercase text-paper-dim hover:text-paper transition"
+              >
+                Read the manifest →
+              </Link>
+            </BlurFade>
+          </div>
+
+          {/* Right rail — dateline */}
+          <div className="hidden md:flex col-span-2 flex-col items-end gap-1 self-center pt-2 font-mono text-[10px] tracking-widest text-muted">
+            <BlurFade delay={0.5}><div>2026 · 04 · 30</div></BlurFade>
+            <BlurFade delay={0.6}><div>HACKATHON ED.</div></BlurFade>
+            <BlurFade delay={0.7}><div>TRACK 02</div></BlurFade>
+          </div>
         </div>
-
-        {/* CTA */}
-        <Link
-          href="/app"
-          className="mt-12 rounded-full border border-accent/60 bg-bg/40 px-8 py-3 text-xs md:text-sm tracking-[0.25em] text-gray-100 transition hover:bg-accent/15 hover:shadow-[0_0_30px_rgba(125,211,252,0.35)]"
-        >
-          ENTER WAR ROOM
-        </Link>
-
-        <p className="mt-6 text-center text-[11px] tracking-widest text-gray-500 max-w-xl">
-          Read, score, escalate. The agent never moves money.
-        </p>
       </section>
 
-      {/* Pipeline diagram */}
-      <section className="absolute bottom-10 left-0 right-0 z-10 px-6">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center text-[10px] tracking-[0.3em] text-gray-500">
-            4-LAYER INTELLIGENCE PIPELINE
-          </div>
-          <div className="mt-4 flex flex-wrap items-stretch justify-center gap-3">
-            <Pipe label="Triage" sub="Haiku 4.5" />
-            <Pipe label="Similarity" sub="OpenAI · 3-large" />
-            <Pipe label="Analyst" sub="Sonnet 4.6" />
-            <Pipe label="Investigation" sub="Cursor SDK" />
-          </div>
-          <div className="mt-6 text-center text-[10px] tracking-[0.3em] text-gray-500">
-            POWERED BY ANTHROPIC · OPENAI · SPECTER · CURSOR SDK
-          </div>
+      {/* Pipeline — pinned just above the footer, always visible */}
+      <section className="relative z-10 shrink-0 px-8 md:px-14 pb-3">
+        <div className="mx-auto max-w-6xl">
+          <BlurFade delay={1.7} className="font-mono text-[10px] tracking-[0.3em] text-paper-dim text-center mb-3">
+            III — A FOUR-LAYER INTELLIGENCE PIPELINE
+          </BlurFade>
+          <BlurFade delay={1.85}>
+            <div className="flex flex-col md:flex-row items-stretch gap-2 md:gap-0">
+              <PipeBox roman="I"   label="Triage"        sub="Haiku 4.5" />
+              <AnimatedBeam delay={0} />
+              <PipeBox roman="II"  label="Similarity"    sub="OpenAI 3-large" />
+              <AnimatedBeam delay={0.2} />
+              <PipeBox roman="III" label="Analyst"       sub="Sonnet 4.6" />
+              <AnimatedBeam delay={0.4} />
+              <PipeBox roman="IV"  label="Investigation" sub="Cursor SDK" />
+            </div>
+          </BlurFade>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="relative z-10 shrink-0 border-t border-border/50 px-8 md:px-14 py-3 font-mono text-[10px] tracking-widest text-muted flex flex-col md:flex-row justify-between gap-2">
+        <span>POWERED BY ANTHROPIC · OPENAI · SPECTER · CURSOR · MAPBOX</span>
+        <span>ATLAS LABS — BUILT IN LONDON · CURSOR × BRIEFCASE 2026</span>
+      </footer>
     </main>
   );
 }
 
-function Stat({ n, label }: { n: string; label: string }) {
+function Stat({ n, label }: { n: number; label: string }) {
   return (
-    <div className="flex flex-col items-center">
-      <span className="text-2xl md:text-3xl font-bold text-accent">{n}</span>
-      <span className="mt-1 text-[10px] tracking-[0.25em] text-gray-400 uppercase">
+    <div className="flex flex-col items-center gap-0.5">
+      <span className="font-display italic text-2xl md:text-3xl text-accent leading-none">
+        <NumberTicker value={n} delay={1.3} />
+      </span>
+      <span className="font-mono text-[9px] tracking-[0.25em] uppercase text-paper-dim">
         {label}
       </span>
     </div>
   );
 }
 
-function Pipe({ label, sub }: { label: string; sub: string }) {
+function PipeBox({ roman, label, sub }: { roman: string; label: string; sub: string }) {
   return (
-    <div className="min-w-[120px] flex-1 max-w-[160px] rounded-md border border-accent/30 bg-panel/40 px-4 py-3 text-center backdrop-blur">
-      <div className="text-sm font-semibold text-gray-100">{label}</div>
-      <div className="mt-1 text-[10px] tracking-widest text-gray-400 uppercase">
+    <div className="relative min-w-0 flex-1 rounded-sm border border-border/70 bg-panel/40 px-4 py-3 backdrop-blur-sm">
+      <div className="flex items-baseline justify-between font-mono text-[9px] tracking-[0.25em] text-paper-dim uppercase mb-1.5">
+        <span>{roman}</span>
+        <span className="text-muted">stage</span>
+      </div>
+      <div className="font-display italic text-lg leading-tight text-paper">{label}</div>
+      <div className="mt-0.5 font-mono text-[10px] tracking-widest text-muted uppercase">
         {sub}
       </div>
     </div>
