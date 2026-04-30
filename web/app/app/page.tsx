@@ -1,16 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import Globe from "@/components/Globe";
 import RiskInbox from "@/components/RiskInbox";
+import InvestigationPanel from "@/components/InvestigationPanel";
 import DemoDock from "@/components/DemoDock";
 import TopBar from "@/components/TopBar";
-import InvestigationPanel from "@/components/InvestigationPanel";
 import { fetchState } from "@/lib/api";
 import { useWS } from "@/lib/ws";
 import type {
   Brief, Counterparty, InvestigationEvent, Metrics, RiskEvent, Transaction,
 } from "@/lib/types";
+
+const Globe = dynamic(() => import("@/components/Globe"), { ssr: false });
 
 export default function Dashboard() {
   const [counterparties, setCounterparties] = useState<Counterparty[]>([]);
@@ -64,9 +66,10 @@ export default function Dashboard() {
         direction: t.direction, ts: Date.now(),
       }]);
     },
-    investigation_event: (payload: any) => {
+    investigation_event: (payload: { event?: InvestigationEvent } | InvestigationEvent) => {
       setInvestigationOpen(true);
-      setInvestigationEvents((prev) => [...prev, payload?.event ?? payload]);
+      const event = "event" in payload && payload.event ? payload.event : (payload as InvestigationEvent);
+      setInvestigationEvents((prev) => [...prev, event]);
     },
   });
 

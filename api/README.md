@@ -32,7 +32,7 @@ DB seeds itself from `shared/fixtures.json` on first boot. SQLite file lives at 
 | `app/workers/analyst.py` — Sonnet | ✅ (fallback brief if no key) | Risk engine |
 | `app/workers/embeddings.py` — OpenAI + cosine | ✅ similar-flags corpus (watch/fragile + shells) | Risk engine |
 | `../scripts/eval_risk_harness.py` | ✅ sample R3 path | Risk engine |
-| `app/specter/client.py` — REST + canned fallback | ⏳ stub (canned works) | Integrations |
+| `app/specter/client.py` — REST + canned fallback | ✅ mapped + boot enrichment | Integrations |
 
 ## TODO markers
 Search for `TODO(A)` / `TODO(B)` / `TODO(D)` in the source (team shorthand in code comments).

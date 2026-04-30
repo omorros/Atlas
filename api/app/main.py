@@ -12,6 +12,7 @@ from .routers import demo, internal, risk_events, state, ws
 from .rules import ALL_RULES
 from .rules.base import RuleEngine
 from .seed import seed_if_empty
+from .specter.client import enrich_counterparties
 
 _rule_engine = RuleEngine(ALL_RULES, tick_seconds=5.0)
 
@@ -19,6 +20,7 @@ _rule_engine = RuleEngine(ALL_RULES, tick_seconds=5.0)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await seed_if_empty()
+    await enrich_counterparties()
     _rule_engine.start()
     sim_task = asyncio.create_task(simulator.run(interval_seconds=4.0))
     try:

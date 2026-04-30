@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
-import type { Counterparty, RiskEvent, Transaction } from "@/lib/types";
+// Same-origin worker URL (bundled). Cross-origin CDN workerUrl throws SecurityError from localhost.
+import mapboxWorkerUrl from "mapbox-gl/dist/mapbox-gl-csp-worker.js?url";
+import type { Counterparty } from "@/lib/types";
 
 const COLOURS: Record<string, string> = {
   stable: "#86a99a",
@@ -27,11 +29,12 @@ export default function Globe({
   // Init map
   useEffect(() => {
     if (!ref.current || mapRef.current) return;
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN?.trim();
     if (!token) {
       setError("NEXT_PUBLIC_MAPBOX_TOKEN missing in web/.env");
       return;
     }
+    mapboxgl.workerUrl = mapboxWorkerUrl;
     mapboxgl.accessToken = token;
     let map: mapboxgl.Map;
     try {
@@ -150,8 +153,17 @@ export default function Globe({
         popup.remove();
       });
     });
+    map.once("load", () => {
+      map.resize();
+      requestAnimationFrame(() => map.resize());
+    });
     mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; styleLoadedRef.current = false; };
+    return () => {
+      clearTimeout(loadTimeout);
+      map.remove();
+      mapRef.current = null;
+      styleLoadedRef.current = false;
+    };
   }, []);
 
   // Update counterparties source on change

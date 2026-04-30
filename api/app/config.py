@@ -18,7 +18,7 @@ class Settings:
     ANTHROPIC_ANALYST_MODEL: str = os.getenv("ANTHROPIC_ANALYST_MODEL", "claude-sonnet-4-20250514")
     OPENAI_API_KEY: str | None = os.getenv("OPENAI_API_KEY") or None
     SPECTER_API_KEY: str | None = os.getenv("SPECTER_API_KEY") or None
-    SPECTER_BASE_URL: str = os.getenv("SPECTER_BASE_URL", "https://api.specter.com/v1")
+    SPECTER_BASE_URL: str = os.getenv("SPECTER_BASE_URL", "https://app.tryspecter.com/api/v1")
     SIDECAR_URL: str = os.getenv("SIDECAR_URL", "http://localhost:8001")
 
     REPO_ROOT: Path = Path(__file__).parent.parent.parent

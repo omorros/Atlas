@@ -2,6 +2,8 @@
 
 import type { InvestigationEvent } from "@/lib/types";
 
+const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const ICONS: Record<string, string> = {
   thinking: "·",
   tool_call: "→",
@@ -62,9 +64,14 @@ export default function InvestigationPanel({
               )}
               {e.type === "artifact" && p.path && (
                 <div className="pl-5 mt-1">
-                  <button className="text-[10px] tracking-widest text-warn underline">
+                  <a
+                    href={typeof p.url === "string" ? `${API}${p.url}` : "#"}
+                    target={typeof p.url === "string" ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="text-[10px] tracking-widest text-warn underline"
+                  >
                     Download {p.path}
-                  </button>
+                  </a>
                 </div>
               )}
             </div>

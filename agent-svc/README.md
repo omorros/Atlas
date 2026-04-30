@@ -12,11 +12,12 @@ npm run dev   # http://localhost:8001/health
 
 Without `CURSOR_API_KEY` it returns a fake event stream so the rest of the team can build the UI panel.
 
-## TODOs for D
-1. Get a Cursor API key (see root README — Integrations dashboard, format `crsr_...`).
-2. Implement the actual `@cursor/sdk` call in `src/investigate.ts` (TODO block is in place).
-3. Add `/internal/investigation-events` endpoint to FastAPI (or pick a different forward channel) so streamed events fan out to WS clients.
-4. Decide: cloud agent against an empty repo, or against this repo? Empty is simpler; this repo gives the agent more context but more risk.
+## Cursor config
+
+- `CURSOR_API_KEY` enables the live Cloud Agent path.
+- Without `CURSOR_API_KEY`, `/investigate` emits the same event shape via a deterministic fallback stream.
+- `CURSOR_REPO_URL` is optional. If set, the Cloud Agent runs with that connected repo and `CURSOR_STARTING_REF` (default `main`). If unset, the SDK uses a generic cloud environment.
+- `CURSOR_MODEL` is optional; leave blank to use the Cursor account default.
 
 ## Cursor SDK refs
 - Quickstart: https://github.com/cursor/cookbook/tree/main/sdk/quickstart
