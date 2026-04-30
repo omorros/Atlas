@@ -1,1 +1,1 @@
-"""LLM / embedding workers. Owner: B."""
+"""LLM and embedding workers (triage, analyst, similarity)."""

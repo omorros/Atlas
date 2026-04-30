@@ -1,4 +1,4 @@
-"""Rule engine framework. Owner: B."""
+"""Rule engine framework (periodic tick, candidate fan-out to risk pipeline)."""
 from __future__ import annotations
 
 import asyncio

@@ -1,4 +1,4 @@
-"""Triage → embeddings → analyst → persist + WS publish. Owner: B."""
+"""Risk pipeline: triage → embeddings → analyst → persist + WebSocket publish."""
 from __future__ import annotations
 
 import logging

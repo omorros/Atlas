@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run sample RiskEventCandidates through triage + analyst (Person B eval harness).
+"""Run sample RiskEventCandidates through triage + analyst (risk engine smoke test).
 
 Usage (from repo root):
   cd api && python ../scripts/eval_risk_harness.py

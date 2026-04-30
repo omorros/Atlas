@@ -1,4 +1,4 @@
-"""Rule plugins + registry. Owner: B."""
+"""Rule plugins + registry (R1–R4)."""
 from __future__ import annotations
 
 from .r1_specter_delta import R1SpecterDelta

@@ -1,4 +1,4 @@
-"""R1 — Specter delta: headcount shock, stale funding, negative news. Owner: B."""
+"""R1 — Specter delta: headcount shock, stale funding, negative news."""
 from __future__ import annotations
 
 from datetime import datetime, timezone

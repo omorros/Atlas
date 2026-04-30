@@ -134,14 +134,14 @@ All four are optional for local dev — the app runs with fallbacks if missing. 
 - Paste into `web/.env` as `NEXT_PUBLIC_MAPBOX_TOKEN`
 - Free tier: 50k loads/month, way more than enough.
 
-### 2. Anthropic (Claude — Haiku + Sonnet) — for Person B
+### 2. Anthropic (Claude — Haiku + Sonnet) — risk engine (triage + analyst briefs)
 - Sign up / log in: https://console.anthropic.com
 - Create key: Settings → API Keys → "Create Key"
 - Paste into `api/.env` and root `.env` as `ANTHROPIC_API_KEY`
 - Add ~$5 of credits, more than enough for the hack.
 - Models we use: `claude-haiku-4-5-20251001`, `claude-sonnet-4-6`.
 
-### 3. OpenAI (embeddings only) — for Person B
+### 3. OpenAI (embeddings only) — risk engine (similar-flags / shell proximity)
 - Sign up / log in: https://platform.openai.com
 - Create key: https://platform.openai.com/api-keys → "Create new secret key"
 - Paste into `api/.env` and root `.env` as `OPENAI_API_KEY`

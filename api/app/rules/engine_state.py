@@ -1,4 +1,4 @@
-"""Load a snapshot dict shared by all rules. Owner: B."""
+"""Load a snapshot dict shared by all rules (risk engine)."""
 from __future__ import annotations
 
 import json

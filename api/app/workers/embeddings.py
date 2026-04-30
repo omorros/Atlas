@@ -1,4 +1,4 @@
-"""Embeddings — OpenAI text-embedding-3-large + cosine similarity. Owner: B."""
+"""Embeddings — OpenAI text-embedding-3-large + cosine similarity for similar-flags."""
 from __future__ import annotations
 
 import json

@@ -1,4 +1,4 @@
-"""Analyst worker — Anthropic Sonnet. Owner: B."""
+"""Analyst worker — Anthropic Sonnet (markdown brief + confidence)."""
 from __future__ import annotations
 
 import json

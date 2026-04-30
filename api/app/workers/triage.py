@@ -1,4 +1,4 @@
-"""Triage worker — Anthropic Haiku. Owner: B."""
+"""Triage worker — Anthropic Haiku (noise filter before analyst)."""
 from __future__ import annotations
 
 import json

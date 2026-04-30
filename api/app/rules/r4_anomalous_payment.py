@@ -1,4 +1,4 @@
-"""R4 — anomalous outgoing payment vs 30d rolling average or very young counterparty. Owner: B."""
+"""R4 — anomalous outgoing payment vs 30d rolling average or very young counterparty."""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone

@@ -1,4 +1,4 @@
-"""R2 — standing exposure: single bank holds > policy % of portfolio cash. Owner: B."""
+"""R2 — standing exposure: single bank holds > policy % of portfolio cash."""
 from __future__ import annotations
 
 from typing import Any

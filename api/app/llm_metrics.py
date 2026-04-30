@@ -1,4 +1,4 @@
-"""Rough cumulative LLM spend estimate for /state metrics. Owner: B."""
+"""Rough cumulative LLM spend estimate for GET /state metrics."""
 from __future__ import annotations
 
 import threading

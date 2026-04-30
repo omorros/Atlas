@@ -1,4 +1,4 @@
-"""Shared candidate type for rules + pipeline. Owner: B."""
+"""Shared candidate type for rules + risk pipeline."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field

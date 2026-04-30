@@ -1,4 +1,4 @@
-"""R3 — first-ever transaction with a counterparty (occurred in this tick window). Owner: B."""
+"""R3 — first-ever transaction with a counterparty (occurred in this tick window)."""
 from __future__ import annotations
 
 from typing import Any
