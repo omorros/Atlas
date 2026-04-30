@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C C:/Users/Oriol/OneDrive/Escritorio/repos/Cursor-hack/ log --oneline -20)",
+      "WebSearch",
+      "WebFetch(domain:cursor.com)",
+      "WebFetch(domain:www.marktechpost.com)",
+      "WebFetch(domain:forum.cursor.com)",
+      "WebFetch(domain:lushbinary.com)",
+      "Bash(gh repo *)",
+      "Bash(gh api *)",
+      "WebFetch(domain:github.com)"
+    ]
+  }
+}
